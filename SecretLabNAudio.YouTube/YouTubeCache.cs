@@ -1,7 +1,7 @@
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 using LabApi.Loader.Features.Paths;
 using SecretLabNAudio.Core;
 using SecretLabNAudio.FFmpeg;
@@ -13,7 +13,7 @@ using YoutubeExplode.Videos;
 
 namespace SecretLabNAudio.YouTube;
 
-public sealed class YouTubeCache
+public sealed class YouTubeCache : AudioCacheBase<VideoId, string>
 {
 
     private static readonly FFmpegArguments Template = new()
@@ -26,61 +26,47 @@ public sealed class YouTubeCache
 
     public static YouTubeCache Shared { get; } = new(PathManager.Plugins.CreateSubdirectory("global").CreateSubdirectory("SecretLabNAudio.YouTube").CreateSubdirectory("Cache"));
 
-    public string Folder { get; }
-
-    public YouTubeCache(string folder)
-    {
-        Folder = folder;
-        Directory.CreateDirectory(folder);
-    }
-
-    public YouTubeCache(DirectoryInfo directoryInfo) : this(directoryInfo.FullName)
+    public YouTubeCache(string folder) : base(folder)
     {
     }
 
-    private string Output(string key, OptimizeFor optimizeFor) => Path.Combine(Folder, $"{key}.{optimizeFor.Extension}");
+    public YouTubeCache(DirectoryInfo directoryInfo) : base(directoryInfo)
+    {
+    }
 
-    public async Awaitable<(string OutputPath, SaveCacheError? Error)> CacheAsync(VideoId id, OptimizeFor optimizeFor)
+    protected override string GetKey(VideoId source) => source.Value;
+
+    public async Awaitable<(string OutputPath, SaveCacheError? Error)> CacheAsync(VideoId id, OptimizeFor optimizeFor, CancellationToken cancellationToken = default)
     {
         if (id == default)
             return ("", new InvalidInputError(id.Value));
         var key = id.Value;
         var output = Output(key, optimizeFor);
         await Awaitable.BackgroundThreadAsync();
-        await using var stream = await AudioPlayerExtensions.GetStream(id, CancellationToken.None);
+        await using var stream = await AudioPlayerExtensions.GetStream(id, cancellationToken);
         using var ffmpeg = FFmpegSL.Start(Template with {Output = output});
         if (ffmpeg == null)
             return (output, new FFmpegStartupError(FFmpegSL.LastCaughtStartError));
-        await stream.CopyToAsync(ffmpeg.Stdin!.BaseStream);
-        while (!ffmpeg.HasExited)
-            await Task.Delay(100);
-        ffmpeg.WaitForExit();
-        return ffmpeg.HasExitedWithError ? (output, new FFmpegRuntimeError(ffmpeg.FinalErrorMessage!)) : (output, null);
+        try
+        {
+            await stream.CopyToAsync(ffmpeg.Stdin!.BaseStream, cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception e)
+        {
+            return (output, e);
+        }
+
+        return !await ffmpeg.WaitForExitAsync(cancellationToken).ConfigureAwait(false)
+            ? (output, SaveCacheError.Canceled)
+            : ffmpeg.HasExitedWithError
+                ? (output, new FFmpegRuntimeError(ffmpeg.FinalErrorMessage!))
+                : (output, null);
     }
 
-    public bool TryGetPath(VideoId source, [NotNullWhen(true)] out string? cachedPath)
+    public new bool TryGetPath(VideoId source, [NotNullWhen(true)] out string? cachedPath)
     {
-        if (source == default)
-        {
-            cachedPath = null;
-            return false;
-        }
-
-        var key = source.Value;
-        var speed = Output(key, OptimizeFor.ReadingSpeed);
-        if (File.Exists(speed))
-        {
-            cachedPath = speed;
-            return true;
-        }
-
-        var size = Output(key, OptimizeFor.FileSize);
-        if (File.Exists(size))
-        {
-            cachedPath = size;
-            return true;
-        }
-
+        if (source != default)
+            return base.TryGetPath(source, out cachedPath);
         cachedPath = null;
         return false;
     }

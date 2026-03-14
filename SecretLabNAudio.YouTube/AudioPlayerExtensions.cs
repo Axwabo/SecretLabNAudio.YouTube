@@ -32,6 +32,11 @@ public static class AudioPlayerExtensions
         public AudioPlayer UseYouTube(VideoId videoId)
             => player.Use(StreamBasedFFmpegAudioProcessor.CreatePlayerCompatible(token => GetStream(videoId, token)));
 
+        public AudioPlayer UseYouTubeCached(VideoId videoId)
+            => YouTubeCache.Shared.TryGetPath(videoId, out var cachedPath)
+                ? player.UseFile(cachedPath)
+                : player.UseYouTube(videoId);
+
     }
 
 }
