@@ -16,7 +16,7 @@ public static class AudioPlayerExtensions
 
     private static readonly YoutubeClient Client = new();
 
-    private static async Task<Stream> GetStream(VideoId id, CancellationToken token)
+    internal static async Task<Stream> GetStream(VideoId id, CancellationToken token)
     {
         var manifest = await Client.Videos.Streams.GetManifestAsync(id, token);
         var stream = manifest.GetAudioStreams()
@@ -29,7 +29,7 @@ public static class AudioPlayerExtensions
     extension(AudioPlayer player)
     {
 
-        public AudioPlayer UseYouTube(VideoId videoId) 
+        public AudioPlayer UseYouTube(VideoId videoId)
             => player.Use(StreamBasedFFmpegAudioProcessor.CreatePlayerCompatible(token => GetStream(videoId, token)));
 
     }
