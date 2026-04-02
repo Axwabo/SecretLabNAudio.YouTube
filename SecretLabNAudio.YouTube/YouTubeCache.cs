@@ -3,12 +3,12 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading;
 using LabApi.Loader.Features.Paths;
-using SecretLabNAudio.Core;
 using SecretLabNAudio.FFmpeg;
 using SecretLabNAudio.FFmpeg.Caches;
 using SecretLabNAudio.FFmpeg.Extensions;
 using SecretLabNAudio.FFmpeg.Interop;
 using UnityEngine;
+using YoutubeExplode;
 using YoutubeExplode.Videos;
 
 namespace SecretLabNAudio.YouTube;
@@ -16,37 +16,32 @@ namespace SecretLabNAudio.YouTube;
 public sealed class YouTubeCache : AudioCacheBase<VideoId, string>
 {
 
-    private static readonly FFmpegArguments Template = new()
-    {
-        Input = FFmpegArguments.StandardPipe,
-        SampleRate = AudioPlayer.SampleRate,
-        Channels = AudioPlayer.Channels,
-        OutputOptions = "-y"
-    };
+    private static readonly FFmpegArguments Template = SimpleFileCache.ArgumentsTemplate.ReadFromStandardInput();
 
-    public static YouTubeCache Shared { get; } = new(PathManager.Plugins.CreateSubdirectory("global").CreateSubdirectory("SecretLabNAudio.YouTube").CreateSubdirectory("Cache"));
+    public static YouTubeCache Shared { get; } = new(
+        PathManager.Plugins.CreateSubdirectory("global").CreateSubdirectory("SecretLabNAudio.YouTube").CreateSubdirectory("Cache"),
+        YoutubeClient.Shared
+    );
 
-    public YouTubeCache(string folder) : base(folder)
-    {
-    }
+    private readonly YoutubeClient _client;
 
-    public YouTubeCache(DirectoryInfo directoryInfo) : base(directoryInfo)
-    {
-    }
+    public YouTubeCache(string folder, YoutubeClient client) : base(folder) => _client = client;
 
-    protected override string GetKey(VideoId source) => source.Value;
+    public YouTubeCache(DirectoryInfo directoryInfo, YoutubeClient client) : base(directoryInfo) => _client = client;
 
-    public async Awaitable<(string OutputPath, SaveCacheError? Error)> CacheAsync(VideoId id, OptimizeFor optimizeFor, CancellationToken cancellationToken = default)
+    public override string GetKey(VideoId source) => source.Value;
+
+    public override async Awaitable<(string OutputPath, SaveCacheError? Error)> CacheAsync(VideoId id, OptimizeFor optimizeFor, CancellationToken cancellationToken = default)
     {
         if (id == default)
             return ("", new InvalidInputError(id.Value));
         var key = id.Value;
-        var output = Output(key, optimizeFor);
+        var output = GetOutput(key, optimizeFor);
         await Awaitable.BackgroundThreadAsync();
-        await using var stream = await AudioPlayerExtensions.GetStream(id, cancellationToken);
+        await using var stream = await _client.GetAudioStreamAsync(id, cancellationToken).ConfigureAwait(false);
         using var ffmpeg = FFmpegSL.Start(Template with {Output = output});
         if (ffmpeg == null)
-            return (output, new FFmpegStartupError(FFmpegSL.LastCaughtStartError));
+            return (output, FFmpegSL.LastCaughtStartError);
         try
         {
             await stream.CopyToAsync(ffmpeg.Stdin!.BaseStream, cancellationToken).ConfigureAwait(false);
