@@ -13,11 +13,17 @@ using YoutubeExplode.Videos;
 
 namespace SecretLabNAudio.YouTube;
 
+/// <summary>
+/// A cache that downloads and optimizes YouTube videos.
+/// </summary>
 public sealed class YouTubeCache : AudioCacheBase<VideoId, string>
 {
 
     private static readonly FFmpegArguments Template = SimpleFileCache.ArgumentsTemplate.ReadFromStandardInput();
 
+    /// <summary>
+    /// A shared <see cref="YouTubeCache"/> instance.
+    /// </summary>
     public static YouTubeCache Shared { get; } = new(
         PathManager.Plugins.CreateSubdirectory("global").CreateSubdirectory("SecretLabNAudio.YouTube").CreateSubdirectory("Cache"),
         YoutubeClient.Shared
@@ -25,10 +31,21 @@ public sealed class YouTubeCache : AudioCacheBase<VideoId, string>
 
     private readonly YoutubeClient _client;
 
+    /// <summary>
+    /// Initializes a new cache, and creates the directory if necessary.
+    /// </summary>
+    /// <param name="folder">The directory to save files to.</param>
+    /// <param name="client">The client to use when connecting to YouTube.</param>
     public YouTubeCache(string folder, YoutubeClient client) : base(folder) => _client = client;
 
+    /// <summary>
+    /// Initializes a new cache, and creates the directory if necessary.
+    /// </summary>
+    /// <param name="directoryInfo">The directory to save files to.</param>
+    /// <param name="client">The client to use when connecting to YouTube.</param>
     public YouTubeCache(DirectoryInfo directoryInfo, YoutubeClient client) : base(directoryInfo) => _client = client;
 
+    /// <inheritdoc/>
     public override string GetKey(VideoId source) => source.Value;
 
     public override async Awaitable<(string OutputPath, SaveCacheError? Error)> CacheAsync(VideoId id, OptimizeFor optimizeFor, CancellationToken cancellationToken = default)
@@ -60,7 +77,8 @@ public sealed class YouTubeCache : AudioCacheBase<VideoId, string>
                 : (output, null);
     }
 
-    public new bool TryGetPath(VideoId source, [NotNullWhen(true)] out string? cachedPath)
+    /// <inheritdoc/>
+    public override bool TryGetPath(VideoId source, [NotNullWhen(true)] out string? cachedPath)
     {
         if (source != default)
             return base.TryGetPath(source, out cachedPath);
