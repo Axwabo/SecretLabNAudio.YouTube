@@ -1,11 +1,10 @@
 using SecretLabNAudio.Core;
 using SecretLabNAudio.Core.Extensions;
 using SecretLabNAudio.FFmpeg.Processors;
-using YoutubeExplode;
+using SecretLabNAudio.YouTube.Caches;
 using YoutubeExplode.Exceptions;
-using YoutubeExplode.Videos;
 
-namespace SecretLabNAudio.YouTube;
+namespace SecretLabNAudio.YouTube.Extensions;
 
 public static class AudioPlayerExtensions
 {

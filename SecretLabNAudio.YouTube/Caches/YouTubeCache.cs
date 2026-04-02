@@ -1,17 +1,12 @@
-using System;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using System.Threading;
 using LabApi.Loader.Features.Paths;
 using SecretLabNAudio.FFmpeg;
 using SecretLabNAudio.FFmpeg.Caches;
 using SecretLabNAudio.FFmpeg.Extensions;
 using SecretLabNAudio.FFmpeg.Interop;
-using UnityEngine;
-using YoutubeExplode;
-using YoutubeExplode.Videos;
+using SecretLabNAudio.YouTube.Extensions;
 
-namespace SecretLabNAudio.YouTube;
+namespace SecretLabNAudio.YouTube.Caches;
 
 /// <summary>
 /// A cache that downloads and optimizes YouTube videos.
@@ -48,7 +43,14 @@ public sealed class YouTubeCache : AudioCacheBase<VideoId, string>
     /// <inheritdoc/>
     public override string GetKey(VideoId source) => source.Value;
 
-    public override async Awaitable<(string OutputPath, SaveCacheError? Error)> CacheAsync(VideoId id, OptimizeFor optimizeFor, CancellationToken cancellationToken = default)
+    /// <summary>
+    /// Asynchronously starts and waits for FFmpeg to cache the given YouTube video.
+    /// </summary>
+    /// <param name="id">The ID of the video to download.</param>
+    /// <param name="optimizeFor">What to optimize for.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+    /// <returns>An <see cref="Awaitable"/> representing the asynchronous operation.</returns>
+    public override async Awaitable<SaveCacheResult> CacheAsync(VideoId id, OptimizeFor optimizeFor, CancellationToken cancellationToken = default)
     {
         if (id == default)
             return ("", new InvalidInputError(id.Value));

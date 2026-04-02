@@ -1,4 +1,3 @@
-using System;
 using LabApi.Loader.Features.Plugins;
 
 namespace SecretLabNAudio.YouTube;

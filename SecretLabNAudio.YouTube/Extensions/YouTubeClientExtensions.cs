@@ -1,11 +1,7 @@
-using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
-using YoutubeExplode;
-using YoutubeExplode.Videos;
 
-namespace SecretLabNAudio.YouTube;
+namespace SecretLabNAudio.YouTube.Extensions;
 
 public static class YouTubeClientExtensions
 {

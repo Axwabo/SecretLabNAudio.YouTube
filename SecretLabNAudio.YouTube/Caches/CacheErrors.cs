@@ -1,7 +1,6 @@
 using SecretLabNAudio.FFmpeg.Caches;
-using YoutubeExplode.Videos;
 
-namespace SecretLabNAudio.YouTube;
+namespace SecretLabNAudio.YouTube.Caches;
 
 public sealed record StreamUnavailableError(VideoId VideoId) : SaveCacheError
 {
