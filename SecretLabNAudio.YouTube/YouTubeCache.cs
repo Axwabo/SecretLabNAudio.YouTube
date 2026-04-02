@@ -39,6 +39,8 @@ public sealed class YouTubeCache : AudioCacheBase<VideoId, string>
         var output = GetOutput(key, optimizeFor);
         await Awaitable.BackgroundThreadAsync();
         await using var stream = await _client.GetAudioStreamAsync(id, cancellationToken).ConfigureAwait(false);
+        if (stream == null)
+            return (output, new StreamUnavailableError(id));
         using var ffmpeg = FFmpegSL.Start(Template with {Output = output});
         if (ffmpeg == null)
             return (output, FFmpegSL.LastCaughtStartError);
