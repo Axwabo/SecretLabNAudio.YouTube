@@ -15,7 +15,7 @@ public static class AudioPlayerExtensions
         public AudioPlayer UseYouTube(VideoId videoId)
             => player.Use(StreamBasedFFmpegAudioProcessor.CreatePlayerCompatible(async token =>
             {
-                var stream = await YoutubeClient.Shared.GetAudioStreamAsync(videoId, token);
+                var stream = await YoutubeClient.Shared.GetHighestQualityAudioStreamAsync(videoId, token);
                 return stream ?? throw new VideoUnavailableException($"No stream found for video {videoId}");
             }));
 

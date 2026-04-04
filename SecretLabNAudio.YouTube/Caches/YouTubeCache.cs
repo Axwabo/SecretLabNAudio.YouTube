@@ -50,14 +50,25 @@ public sealed class YouTubeCache : AudioCacheBase<VideoId, string>
     /// <param name="optimizeFor">What to optimize for.</param>
     /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
     /// <returns>An <see cref="Awaitable"/> representing the asynchronous operation.</returns>
-    public override async Awaitable<SaveCacheResult> CacheAsync(VideoId id, OptimizeFor optimizeFor, CancellationToken cancellationToken = default)
+    public override Awaitable<SaveCacheResult> CacheAsync(VideoId id, OptimizeFor optimizeFor, CancellationToken cancellationToken = default)
+        => CacheAsync(id, PickStream.HighestBitrate, optimizeFor, cancellationToken);
+
+    /// <summary>
+    /// Asynchronously starts and waits for FFmpeg to cache the given YouTube video.
+    /// </summary>
+    /// <param name="id">The ID of the video to download.</param>
+    /// <param name="pickStream">A delegate that picks the most optimal stream from, given the manifest.</param>
+    /// <param name="optimizeFor">What to optimize for.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+    /// <returns>An <see cref="Awaitable"/> representing the asynchronous operation.</returns>
+    public async Awaitable<SaveCacheResult> CacheAsync(VideoId id, PickStream pickStream, OptimizeFor optimizeFor, CancellationToken cancellationToken = default)
     {
         if (id == default)
             return ("", new InvalidInputError(id.Value));
         var key = id.Value;
         var output = GetOutput(key, optimizeFor);
         await Awaitable.BackgroundThreadAsync();
-        await using var stream = await _client.GetAudioStreamAsync(id, cancellationToken).ConfigureAwait(false);
+        await using var stream = await _client.GetAudioStreamAsync(id, pickStream, cancellationToken).ConfigureAwait(false);
         if (stream == null)
             return (output, new StreamUnavailableError(id));
         using var ffmpeg = FFmpegSL.Start(Template with {Output = output});
