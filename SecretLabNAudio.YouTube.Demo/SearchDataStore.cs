@@ -1,4 +1,3 @@
-extern alias mscorlib;
 using System.Collections.Generic;
 using LabApi.Features.Stores;
 using LabApi.Features.Wrappers;

@@ -24,7 +24,9 @@ public sealed class YouTubeCommand : ParentCommand
 
     public override void LoadGeneratedCommands()
     {
+        RegisterCommand(new PlayCommand());
         RegisterCommand(new SearchCommand());
+        RegisterCommand(new MyResultsCommand());
     }
 
 }

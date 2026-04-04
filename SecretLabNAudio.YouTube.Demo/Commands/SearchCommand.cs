@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 using CommandSystem;
 using LabApi.Features.Wrappers;
 using SecretLabNAudio.YouTube.Extensions;
@@ -49,12 +48,14 @@ public sealed class SearchCommand : ICommand
         return true;
     }
 
+    public static string FormatResponse(VideoSearchResult result, int index) => $"YouTube Search##{index + 1} {Dot} {result.Title} {Dot} {result.Author} {Dot} {result.Title}";
+
     private static async Awaitable RespondSimpleAsync(string query, ICommandSender sender)
     {
         await Awaitable.NextFrameAsync();
         sender.Respond($"Video ID#Title {Dot} Author {Dot} Duration");
         var count = 0;
-        await foreach (var result in YoutubeClient.Shared.Search.GetVideosAsync(query).ConfigureAwait(false))
+        await foreach (var result in YoutubeClient.Shared.Search.GetVideosAsync(query))
         {
             sender.Respond($"{result.Id}#{result.Title} {Dot} {result.Author} {Dot} {result.Duration}");
             if (++count >= Max)
@@ -85,11 +86,11 @@ public sealed class SearchCommand : ICommand
     private static async Awaitable AppendAndRespondAsync(string query, ICommandSender sender, List<VideoSearchResult> results, CancellationToken cancellationToken)
     {
         var count = 0;
-        var enumerable = YoutubeClient.Shared.Search.GetVideosAsync(query, cancellationToken).ConfigureAwait(false);
+        var enumerable = YoutubeClient.Shared.Search.GetVideosAsync(query, cancellationToken);
         await foreach (var result in enumerable)
         {
             results.Add(result);
-            sender.Respond($"YouTube Search##{count + 1} {Dot} {result.Title} {Dot} {result.Author} {Dot} {result.Title}");
+            sender.Respond(FormatResponse(result, count));
             if (++count >= Max)
                 break;
         }
