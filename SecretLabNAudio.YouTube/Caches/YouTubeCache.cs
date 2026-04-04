@@ -87,7 +87,7 @@ public sealed class YouTubeCache : AudioCacheBase<VideoId, string>
             ? (output, SaveCacheError.Canceled)
             : ffmpeg.HasExitedWithError
                 ? (output, new FFmpegRuntimeError(ffmpeg.FinalErrorMessage!))
-                : (output, null);
+                : (output, (SaveCacheError?) null);
     }
 
     /// <inheritdoc/>

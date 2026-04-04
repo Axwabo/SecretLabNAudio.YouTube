@@ -15,8 +15,12 @@ internal sealed class YouTubePlugin : Plugin
 
     public override Version RequiredApiVersion { get; } = new(1, 0, 0);
 
-    public override void Enable() => throw new NotImplementedException();
+    public override void Enable()
+    {
+    }
 
-    public override void Disable() => throw new NotImplementedException();
+    public override void Disable()
+    {
+    }
 
 }
