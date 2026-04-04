@@ -4,12 +4,14 @@ using SecretLabNAudio.Core;
 using SecretLabNAudio.Core.Extensions;
 using SecretLabNAudio.Core.Pools;
 using SecretLabNAudio.FFmpeg.Caches;
+using SecretLabNAudio.FFmpeg.Extensions;
 using SecretLabNAudio.YouTube.Caches;
 using SecretLabNAudio.YouTube.Extensions;
 using UnityEngine;
 using YoutubeExplode;
 using YoutubeExplode.Search;
 using YoutubeExplode.Videos;
+using Logger = LabApi.Features.Console.Logger;
 
 namespace SecretLabNAudio.YouTube.Demo;
 
@@ -48,7 +50,9 @@ public static class PlaybackManager
         CachingInProgress[videoId] = true;
         try
         {
-            await YouTubeCache.Shared.CacheAsync(videoId, OptimizeFor.FileSize);
+            var (_, error) = await YouTubeCache.Shared.CacheAsync(videoId, OptimizeFor.FileSize);
+            if (error is not null)
+                Logger.Error($"Failed caching video {videoId}: {error.ToHumanReadableString()}");
         }
         finally
         {
