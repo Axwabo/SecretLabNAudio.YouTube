@@ -15,12 +15,12 @@ public sealed class YouTubeDemoPlugin : Plugin
 
     public override void Enable()
     {
-        CustomDataStoreManager.RegisterStore<ResultsDataStore>();
+        CustomDataStoreManager.RegisterStore<SearchDataStore>();
     }
 
     public override void Disable()
     {
-        CustomDataStoreManager.UnregisterStore<ResultsDataStore>();
+        CustomDataStoreManager.UnregisterStore<SearchDataStore>();
     }
 
 }
