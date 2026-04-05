@@ -86,6 +86,7 @@ public static class PlaybackManager
     private static async Awaitable CacheAsync(VideoId videoId, VideoSearchResult? result)
     {
         CachingInProgress[videoId] = true;
+        await Awaitable.NextFrameAsync();
         using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(5));
         Logger.Info($"Caching YouTube video {videoId}");
         var (_, error) = result == null
