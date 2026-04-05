@@ -1,4 +1,5 @@
 using SecretLabNAudio.FFmpeg.Caches;
+using YoutubeExplode.Exceptions;
 
 namespace SecretLabNAudio.YouTube.Caches;
 
@@ -9,9 +10,16 @@ public sealed record StreamUnavailableError(VideoId VideoId) : SaveCacheError
 
 }
 
-public sealed record YouTubeExceptionError(Exception Exception) : SaveCacheError
+public sealed record YouTubeExceptionError(YoutubeExplodeException Exception) : SaveCacheError
 {
 
     public override string ToString() => Exception.Message;
+
+}
+
+public sealed record PossiblyOutdatedVersionError(PossiblyOutdatedYoutubeExplodeException Exception) : SaveCacheError
+{
+
+    public override string ToString() => $"{Exception.Message} {Exception.InnerException.Message}";
 
 }

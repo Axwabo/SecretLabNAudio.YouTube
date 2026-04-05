@@ -6,6 +6,7 @@ using SecretLabNAudio.FFmpeg.Interop;
 using SecretLabNAudio.YouTube.Extensions;
 using YoutubeExplode.Channels;
 using YoutubeExplode.Common;
+using YoutubeExplode.Exceptions;
 
 namespace SecretLabNAudio.YouTube.Caches;
 
@@ -79,9 +80,13 @@ public sealed class YouTubeCache : AudioCacheBase<VideoId, string>
         {
             stream = await _client.GetAudioStreamAsync(id, pickStream, cancellationToken).ConfigureAwait(false);
         }
-        catch (Exception e)
+        catch (YoutubeExplodeException e)
         {
             return (output, new YouTubeExceptionError(e));
+        }
+        catch (PossiblyOutdatedYoutubeExplodeException e)
+        {
+            return (output, new PossiblyOutdatedVersionError(e));
         }
 
         if (stream == null)

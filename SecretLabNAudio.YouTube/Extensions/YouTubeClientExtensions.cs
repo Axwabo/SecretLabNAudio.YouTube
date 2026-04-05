@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using YoutubeExplode.Exceptions;
 
 namespace SecretLabNAudio.YouTube.Extensions;
 
@@ -16,11 +17,22 @@ public static class YouTubeClientExtensions
         {
             if (id == default)
                 return null;
-            var streams = await client.Videos.Streams.GetManifestAsync(id, cancellationToken).ConfigureAwait(false);
-            var best = pick(streams);
-            return best == null
-                ? null
-                : await client.Videos.Streams.GetAsync(best, cancellationToken).ConfigureAwait(false);
+            try
+            {
+                var streams = await client.Videos.Streams.GetManifestAsync(id, cancellationToken).ConfigureAwait(false);
+                var best = pick(streams);
+                return best == null
+                    ? null
+                    : await client.Videos.Streams.GetAsync(best, cancellationToken).ConfigureAwait(false);
+            }
+            catch (YoutubeExplodeException)
+            {
+                throw;
+            }
+            catch (Exception e)
+            {
+                throw new PossiblyOutdatedYoutubeExplodeException(e);
+            }
         }
 
         public Task<Stream?> GetHighestQualityAudioStreamAsync(VideoId id, CancellationToken cancellationToken = default)
