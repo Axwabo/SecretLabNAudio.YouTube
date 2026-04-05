@@ -5,6 +5,9 @@ using SecretLabNAudio.FFmpeg.Caches;
 using SecretLabNAudio.FFmpeg.Extensions;
 using SecretLabNAudio.FFmpeg.Interop;
 using SecretLabNAudio.YouTube.Extensions;
+using YoutubeExplode.Channels;
+using YoutubeExplode.Common;
+using YoutubeExplode.Videos.Streams;
 
 namespace SecretLabNAudio.YouTube.Caches;
 
@@ -13,6 +16,9 @@ namespace SecretLabNAudio.YouTube.Caches;
 /// </summary>
 public sealed class YouTubeCache : AudioCacheBase<VideoId, string>
 {
+
+    private const string TitleExtension = "title";
+    private const string AuthorExtension = "author";
 
     private static readonly FFmpegArguments Template = SimpleFileCache.ArgumentsTemplate.ReadFromStandardInput();
 
@@ -51,7 +57,7 @@ public sealed class YouTubeCache : AudioCacheBase<VideoId, string>
     /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
     /// <returns>An <see cref="Awaitable"/> representing the asynchronous operation.</returns>
     public override Awaitable<SaveCacheResult> CacheAsync(VideoId id, OptimizeFor optimizeFor, CancellationToken cancellationToken = default)
-        => CacheAsync(id, PickStream.HighestBitrate, optimizeFor, cancellationToken);
+        => CacheAsync(id, null, null, PickStream.HighestBitrate, optimizeFor, cancellationToken);
 
     /// <summary>
     /// Asynchronously starts and waits for FFmpeg to cache the given YouTube video.
@@ -61,33 +67,34 @@ public sealed class YouTubeCache : AudioCacheBase<VideoId, string>
     /// <param name="optimizeFor">What to optimize for.</param>
     /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
     /// <returns>An <see cref="Awaitable"/> representing the asynchronous operation.</returns>
-    public async Awaitable<SaveCacheResult> CacheAsync(VideoId id, PickStream pickStream, OptimizeFor optimizeFor, CancellationToken cancellationToken = default)
+    public async Awaitable<SaveCacheResult> CacheAsync(VideoId id, string? title, Author? author, PickStream pickStream, OptimizeFor optimizeFor, CancellationToken cancellationToken = default)
     {
         if (id == default)
             return ("", new InvalidInputError(id.Value));
         var key = id.Value;
         var output = GetOutput(key, optimizeFor);
         await Awaitable.BackgroundThreadAsync();
-        await using var stream = await _client.GetAudioStreamAsync(id, pickStream, cancellationToken).ConfigureAwait(false);
-        if (stream == null)
-            return (output, new StreamUnavailableError(id));
-        using var ffmpeg = FFmpegSL.Start(Template with {Output = output});
-        if (ffmpeg == null)
-            return (output, FFmpegSL.LastCaughtStartError);
+        Stream? stream;
         try
         {
-            await stream.CopyToAsync(ffmpeg.Stdin!.BaseStream, cancellationToken).ConfigureAwait(false);
+            stream = await _client.GetAudioStreamAsync(id, pickStream, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception e)
         {
-            return (output, e);
+            return (output, new YouTubeExceptionError(e));
         }
 
-        return !await ffmpeg.WaitForExitAsync(cancellationToken).ConfigureAwait(false)
-            ? (output, SaveCacheError.Canceled)
-            : ffmpeg.HasExitedWithError
-                ? (output, new FFmpegRuntimeError(ffmpeg.FinalErrorMessage!))
-                : (output, (SaveCacheError?) null);
+        if (stream == null)
+            return (output, new StreamUnavailableError(id));
+        var (ffmpeg, result) = await TranscodeAsync(stream, output, cancellationToken);
+        if (ffmpeg == null)
+            return result;
+        if (!await ffmpeg.WaitForExitAsync(cancellationToken).ConfigureAwait(false))
+            return (output, SaveCacheError.Canceled);
+        if (ffmpeg.HasExitedWithError)
+            return (output, new FFmpegRuntimeError(ffmpeg.FinalErrorMessage!));
+        await WriteMetadataAsync(id, output, title, author, cancellationToken);
+        return (output, null);
     }
 
     /// <inheritdoc/>
@@ -97,6 +104,59 @@ public sealed class YouTubeCache : AudioCacheBase<VideoId, string>
             return base.TryGetPath(source, out cachedPath);
         cachedPath = null;
         return false;
+    }
+
+    public (string? VideoTitle, string? ChannelTitle, ChannelId? ChannelId) GetCachedMetadata(VideoId videoId)
+    {
+        if (videoId == default)
+            return (null, null, null);
+        var filePath = Path.Combine(Folder, videoId);
+        var titleFile = $"{filePath}.{TitleExtension}";
+        var authorFile = $"{filePath}.{AuthorExtension}";
+        var videoTitle = File.Exists(titleFile) ? File.ReadAllText(titleFile).Trim() : null;
+        return File.Exists(authorFile) && File.ReadAllLines(authorFile) is [var name, var id, ..]
+            ? (videoTitle, name.Trim(), ChannelId.TryParse(id.Trim()))
+            : (videoTitle, null, null);
+    }
+
+    private static async Awaitable<(FFmpegSL?, SaveCacheResult)> TranscodeAsync(Stream stream, string output, CancellationToken cancellationToken)
+    {
+        await using var disposedStream = stream;
+        using var ffmpeg = FFmpegSL.Start(Template with {Output = output});
+        if (ffmpeg == null)
+            return (null, (output, FFmpegSL.LastCaughtStartError));
+        try
+        {
+            await stream.CopyToAsync(ffmpeg.Stdin.BaseStream, cancellationToken).ConfigureAwait(false);
+            return (ffmpeg, default);
+        }
+        catch (Exception e)
+        {
+            return (null, (output, e));
+        }
+        finally
+        {
+            ffmpeg.Stdin.BaseStream.Close();
+        }
+    }
+
+    private static async Awaitable WriteMetadataAsync(VideoId id, string output, string? title, Author? author, CancellationToken cancellationToken)
+    {
+        try
+        {
+            if (title != null)
+                await File.WriteAllTextAsync(Path.ChangeExtension(output, TitleExtension), title, cancellationToken).ConfigureAwait(false);
+            if (author != null)
+                await File.WriteAllTextAsync(Path.ChangeExtension(output, AuthorExtension), $"{author.ChannelTitle}\n{author.ChannelId}", cancellationToken).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Failed to write metadata for the cached YouTube video {id}");
+            Debug.LogException(e);
+        }
     }
 
 }
