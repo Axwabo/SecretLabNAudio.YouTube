@@ -1,25 +1,30 @@
 using System;
 using CommandSystem;
+using LabApi.Features.Permissions;
 using LabApi.Features.Wrappers;
 using RemoteAdmin;
 using YoutubeExplode.Videos;
 
 namespace SecretLabNAudio.YouTube.Demo.Commands;
 
-public sealed class PlayCommand : ICommand
+public sealed class PlayCommand : ICommand, IUsageProvider
 {
 
     public string Command => "play";
-    public string[] Aliases { get; } = [];
-    public string Description => "Plays a YouTube video";
+    public string[] Aliases { get; } = ["p"];
+    public string Description => "Plays a YouTube video, or pauses/resumes the playback";
+    public string[] Usage { get; } = ["[index/ID/URL]"];
 
     public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
     {
-        if (arguments.Count == 0)
+        if (!sender.HasAnyPermission("yt.play"))
         {
-            response = sender is PlayerCommandSender ? "Please provide an index, video ID or URL!" : "Please provide a video ID or URL!";
+            response = "You don't have permission to use this command.";
             return false;
         }
+
+        if (arguments.Count == 0)
+            return TogglePlaybackState(sender, out response);
 
         if (Player.TryGet(sender, out var player) && byte.TryParse(arguments.At(0), out var index))
         {
@@ -45,6 +50,22 @@ public sealed class PlayCommand : ICommand
         PlaybackManager.Play(id.Value);
         response = "Playback started.";
         return true;
+    }
+
+    private static bool TogglePlaybackState(ICommandSender sender, out string response)
+    {
+        switch (PlaybackManager.TogglePause())
+        {
+            case null:
+                response = sender is PlayerCommandSender ? "Please provide an index, video ID or URL!" : "Please provide a video ID or URL!";
+                return false;
+            case true:
+                response = "Playback paused.";
+                return true;
+            case false:
+                response = "Playback resumed.";
+                return true;
+        }
     }
 
 }

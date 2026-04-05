@@ -37,6 +37,17 @@ public static class PlaybackManager
             ? "No active playback"
             : $"Last error: {_lastError}";
 
+    public static bool? TogglePause() => IsInactive ? null : _player!.IsPaused = !_player.IsPaused;
+
+    public static bool Stop()
+    {
+        if (IsInactive)
+            return false;
+        _lastError = _player!.MapError();
+        AudioPlayerPool.Return(_player!);
+        return true;
+    }
+
     public static void Play(VideoId id)
     {
         PlayInternal(id);

@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using CommandSystem;
 
 namespace SecretLabNAudio.YouTube.Demo.Commands;
@@ -18,7 +19,7 @@ public sealed class YouTubeCommand : ParentCommand
 
     protected override bool ExecuteParent(ArraySegment<string> arguments, ICommandSender sender, out string response)
     {
-        response = "Please specify a valid subcommand!";
+        response = $"Please specify a valid subcommand! Usages:\n{string.Join("\n", AllCommands.Select(FormatCommand))}";
         return false;
     }
 
@@ -27,7 +28,10 @@ public sealed class YouTubeCommand : ParentCommand
         RegisterCommand(new PlayCommand());
         RegisterCommand(new SearchCommand());
         RegisterCommand(new MyResultsCommand());
+        RegisterCommand(new StopCommand());
         RegisterCommand(new DiagnoseCommand());
     }
+
+    private static string FormatCommand(ICommand command) => $"> {command.Command}{(command is IUsageProvider {Usage: [var usage]} ? $" {usage}" : "")} - {command.Description}";
 
 }

@@ -9,8 +9,8 @@ public sealed class MyResultsCommand : ICommand
 {
 
     public string Command => "myResults";
-    public string[] Aliases { get; } = [];
-    public string Description => "Shows your results (players only)";
+    public string[] Aliases { get; } = ["m"];
+    public string Description => "Shows your search results (players only)";
 
     public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
     {

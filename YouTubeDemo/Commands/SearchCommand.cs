@@ -10,7 +10,7 @@ using YoutubeExplode.Search;
 
 namespace SecretLabNAudio.YouTube.Demo.Commands;
 
-public sealed class SearchCommand : ICommand
+public sealed class SearchCommand : ICommand, IUsageProvider
 {
 
     private const string Dot = "•";
@@ -20,6 +20,7 @@ public sealed class SearchCommand : ICommand
     public string Command => "search";
     public string[] Aliases { get; } = ["s"];
     public string Description => "Search for videos on YouTube";
+    public string[] Usage { get; } = ["<query>"];
 
     public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
     {
