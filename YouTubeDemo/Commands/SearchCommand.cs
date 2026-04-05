@@ -15,6 +15,7 @@ public sealed class SearchCommand : ICommand
 
     private const string Dot = "•";
     private const int Max = 10;
+    private const string Prefix = "YouTube Search#";
 
     public string Command => "search";
     public string[] Aliases { get; } = ["s"];
@@ -48,7 +49,7 @@ public sealed class SearchCommand : ICommand
         return true;
     }
 
-    public static string FormatResponse(VideoSearchResult result, int index) => $"YouTube Search##{index + 1} {Dot} {result.Title} {Dot} {result.Author} {Dot} {result.Title}";
+    public static string FormatResponse(VideoSearchResult result, int index) => $"#{index + 1} {Dot} <b>{result.Title}</b> {Dot} {result.Author} {Dot} {result.Duration}";
 
     private static async Awaitable RespondSimpleAsync(string query, ICommandSender sender)
     {
@@ -70,12 +71,12 @@ public sealed class SearchCommand : ICommand
         try
         {
             await Awaitable.NextFrameAsync();
-            sender.Respond($"YouTube Search##Index {Dot} Title {Dot} Author {Dot} Duration");
+            sender.Respond($"{Prefix}#Index {Dot} <b>Title</b> {Dot} Author {Dot} Duration");
             await AppendAndRespondAsync(query, sender, store.Results, store.Owner.ReferenceHub.destroyCancellationToken);
         }
         catch (Exception e)
         {
-            sender.Respond($"YouTube Search#{e}", false);
+            sender.Respond($"{Prefix}{e}", false);
         }
         finally
         {
@@ -90,7 +91,7 @@ public sealed class SearchCommand : ICommand
         await foreach (var result in enumerable)
         {
             results.Add(result);
-            sender.Respond(FormatResponse(result, count));
+            sender.Respond($"{Prefix}{FormatResponse(result, count)}");
             if (++count >= Max)
                 break;
         }

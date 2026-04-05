@@ -27,6 +27,7 @@ public sealed class YouTubeCommand : ParentCommand
         RegisterCommand(new PlayCommand());
         RegisterCommand(new SearchCommand());
         RegisterCommand(new MyResultsCommand());
+        RegisterCommand(new DiagnoseCommand());
     }
 
 }
