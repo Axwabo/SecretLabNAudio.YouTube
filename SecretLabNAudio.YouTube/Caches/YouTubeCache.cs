@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using LabApi.Loader.Features.Paths;
 using SecretLabNAudio.FFmpeg;
 using SecretLabNAudio.FFmpeg.Caches;
@@ -7,7 +6,6 @@ using SecretLabNAudio.FFmpeg.Interop;
 using SecretLabNAudio.YouTube.Extensions;
 using YoutubeExplode.Channels;
 using YoutubeExplode.Common;
-using YoutubeExplode.Videos.Streams;
 
 namespace SecretLabNAudio.YouTube.Caches;
 
@@ -63,6 +61,8 @@ public sealed class YouTubeCache : AudioCacheBase<VideoId, string>
     /// Asynchronously starts and waits for FFmpeg to cache the given YouTube video.
     /// </summary>
     /// <param name="id">The ID of the video to download.</param>
+    /// <param name="title">The title of the video (if known).</param>
+    /// <param name="author">The author of the video (if known).</param>
     /// <param name="pickStream">A delegate that picks the most optimal stream from, given the manifest.</param>
     /// <param name="optimizeFor">What to optimize for.</param>
     /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
@@ -89,6 +89,7 @@ public sealed class YouTubeCache : AudioCacheBase<VideoId, string>
         var (ffmpeg, result) = await TranscodeAsync(stream, output, cancellationToken);
         if (ffmpeg == null)
             return result;
+        using var disposeFFmpeg = ffmpeg;
         if (!await ffmpeg.WaitForExitAsync(cancellationToken).ConfigureAwait(false))
             return (output, SaveCacheError.Canceled);
         if (ffmpeg.HasExitedWithError)
@@ -121,8 +122,7 @@ public sealed class YouTubeCache : AudioCacheBase<VideoId, string>
 
     private static async Awaitable<(FFmpegSL?, SaveCacheResult)> TranscodeAsync(Stream stream, string output, CancellationToken cancellationToken)
     {
-        await using var disposedStream = stream;
-        using var ffmpeg = FFmpegSL.Start(Template with {Output = output});
+        var ffmpeg = FFmpegSL.Start(Template with {Output = output});
         if (ffmpeg == null)
             return (null, (output, FFmpegSL.LastCaughtStartError));
         try
@@ -132,11 +132,13 @@ public sealed class YouTubeCache : AudioCacheBase<VideoId, string>
         }
         catch (Exception e)
         {
+            ffmpeg.Dispose();
             return (null, (output, e));
         }
         finally
         {
             ffmpeg.Stdin.BaseStream.Close();
+            await stream.DisposeAsync();
         }
     }
 

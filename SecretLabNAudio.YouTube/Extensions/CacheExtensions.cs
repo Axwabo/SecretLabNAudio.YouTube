@@ -10,6 +10,9 @@ public static class CacheExtensions
     extension(YouTubeCache cache)
     {
 
+        public Awaitable<SaveCacheResult> CacheAsync(VideoId id, PickStream pickStream, OptimizeFor optimizeFor, CancellationToken cancellationToken = default)
+            => cache.CacheAsync(id, null, null, pickStream, optimizeFor, cancellationToken);
+
         public Awaitable<SaveCacheResult> CacheAsync(Video video, OptimizeFor optimizeFor, CancellationToken cancellationToken = default)
             => cache.CacheAsync(video, PickStream.HighestBitrate, optimizeFor, cancellationToken);
 
