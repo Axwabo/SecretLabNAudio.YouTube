@@ -1,5 +1,4 @@
 using SecretLabNAudio.FFmpeg.Caches;
-using YoutubeExplode.Exceptions;
 
 namespace SecretLabNAudio.YouTube.Caches;
 
