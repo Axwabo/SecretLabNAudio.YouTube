@@ -63,7 +63,9 @@ public static class PlaybackManager
     private static void PlayInternal(VideoId videoId, VideoSearchResult? result = null)
     {
         _lastError = null;
-        EnsurePlayer().UseCachedYouTube(videoId);
+        EnsurePlayer()
+            .UseCachedYouTube(videoId)
+            .Resume();
         if (!YouTubeCache.Shared.TryGetPath(videoId, out _) && !CachingInProgress.ContainsKey(videoId))
             _ = CacheAsync(videoId, result);
     }
