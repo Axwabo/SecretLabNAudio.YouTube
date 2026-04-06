@@ -85,7 +85,7 @@ public sealed class YouTubeCache : AudioCacheBase<VideoId, string>
         }
         catch (PossiblyOutdatedYoutubeExplodeException e)
         {
-            return (output, new PossiblyOutdatedVersionError(e));
+            return (output, new PossiblyOutdatedYoutubeExplodeError(e));
         }
 
         if (stream == null)
@@ -134,8 +134,15 @@ public sealed class YouTubeCache : AudioCacheBase<VideoId, string>
             };
     }
 
-    
-    public Awaitable WriteMetadataAsync(VideoId videoId, string title, Author author, CancellationToken cancellationToken = default) 
+    /// <summary>
+    /// Asynchronously writes metadata to the disk about the video.
+    /// </summary>
+    /// <param name="videoId">The ID of the video the metadata belongs to.</param>
+    /// <param name="title">The title of the video.</param>
+    /// <param name="author">The author of the video.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>An <see cref="Awaitable"/> representing the asynchronous operation.</returns>
+    public Awaitable WriteMetadataAsync(VideoId videoId, string title, Author author, CancellationToken cancellationToken = default)
         => WriteMetadataAsync(videoId, Path.Combine(Folder, videoId), title, author, cancellationToken);
 
     private static async Awaitable<(FFmpegSL?, SaveCacheResult)> TranscodeAsync(Stream stream, string output, CancellationToken cancellationToken)

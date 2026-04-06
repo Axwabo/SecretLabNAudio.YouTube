@@ -1,5 +1,4 @@
 using System.Linq;
-using YoutubeExplode.Videos.Streams;
 
 namespace SecretLabNAudio.YouTube.Extensions;
 
