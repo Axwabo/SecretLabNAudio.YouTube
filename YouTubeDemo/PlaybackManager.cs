@@ -12,7 +12,6 @@ using SecretLabNAudio.YouTube.Caches;
 using SecretLabNAudio.YouTube.Extensions;
 using UnityEngine;
 using YoutubeExplode;
-using YoutubeExplode.Common;
 using YoutubeExplode.Search;
 using YoutubeExplode.Videos;
 using Logger = LabApi.Features.Console.Logger;
@@ -96,7 +95,7 @@ public static class PlaybackManager
             ? await YouTubeCache.Shared.CacheAsync(videoId, OptimizeFor.FileSize, cts.Token)
             : await YouTubeCache.Shared.CacheAsync(result, OptimizeFor.FileSize, cts.Token);
         if (error is not null)
-            Logger.Error($"Failed caching video {videoId}: {error.ToHumanReadableString()}");
+            Logger.Error($"Failed to cache video {videoId}: {error.ToHumanReadableString()}");
         else
             Logger.Info($"Successfully cached YouTube video {videoId}");
         CachingInProgress.TryRemove(videoId, out _);
