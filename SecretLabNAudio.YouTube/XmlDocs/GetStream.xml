@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doc>
+    <returns>
+        A
+        <see cref="T:System.Threading.Tasks.Task" />
+        representing the asynchronous operation. The result is null if no adequate stream was found.
+    </returns>
+    <exception cref="T:YoutubeExplode.Exceptions.YoutubeExplodeException">Thrown if YoutubeExplode encounters an error while extracting the manifest.</exception>
+    <exception cref="T:System.OperationCanceledException">
+        Thrown if the
+        <paramref name="cancellationToken" />
+        signaled cancellation.
+    </exception>
+    <exception cref="T:SecretLabNAudio.YouTube.Exceptions.PossiblyOutdatedYoutubeExplodeException">
+        Thrown if any other exception is caught.
+        The
+        <see cref="P:SecretLabNAudio.YouTube.Exceptions.PossiblyOutdatedYoutubeExplodeException.InnerException" />
+        is specified.
+        This exception is used to let users know that YoutubeExplode might be outdated.
+    </exception>
+</doc>

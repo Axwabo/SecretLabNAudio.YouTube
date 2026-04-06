@@ -112,6 +112,11 @@ public sealed class YouTubeCache : AudioCacheBase<VideoId, string>
         return false;
     }
 
+    /// <summary>
+    /// Gets the cached metadata for the given video ID.
+    /// </summary>
+    /// <param name="videoId">The ID to get the metadata of.</param>
+    /// <returns></returns>
     public (string? VideoTitle, string? ChannelTitle, ChannelId? ChannelId) GetCachedMetadata(VideoId videoId)
     {
         if (videoId == default)

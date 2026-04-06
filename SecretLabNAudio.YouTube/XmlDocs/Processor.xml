@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doc>
+    <returns>
+        A new
+        <see cref="T:SecretLabNAudio.FFmpeg.Processors.StreamBasedFFmpegAudioProcessor" />
+        that resolves the YouTube video, then starts processing audio.
+    </returns>
+    <remarks>
+        If no stream is available, the
+        <see cref="P:SecretLabNAudio.FFmpeg.Processors.AsyncFFmpegProcessorBase.AsyncException" />
+        property will be set to a
+        <see cref="T:SecretLabNAudio.YouTube.Exceptions.NoStreamFoundException" />.
+        If a different exception occurs, the property will also be set to that exception.
+    </remarks>
+</doc>
