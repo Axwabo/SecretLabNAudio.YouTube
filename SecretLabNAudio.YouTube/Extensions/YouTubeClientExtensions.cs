@@ -28,6 +28,10 @@ public static class YouTubeClientExtensions
             {
                 throw;
             }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
             catch (Exception e)
             {
                 throw new PossiblyOutdatedYoutubeExplodeException(e);

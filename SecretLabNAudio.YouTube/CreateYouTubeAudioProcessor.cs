@@ -25,8 +25,15 @@ public static class CreateYouTubeAudioProcessor
     {
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(token);
         cts.CancelAfter(getStreamTimeout);
-        var stream = await YoutubeClient.Shared.GetAudioStreamAsync(videoId, pickStream, cts.Token);
-        return stream ?? throw new NoStreamFoundException(videoId);
+        try
+        {
+            var stream = await YoutubeClient.Shared.GetAudioStreamAsync(videoId, pickStream, cts.Token);
+            return stream ?? throw new NoStreamFoundException(videoId);
+        }
+        catch (OperationCanceledException e) when (!token.IsCancellationRequested)
+        {
+            throw new TimeoutException("Obtaining an audio stream timed out.", e);
+        }
     });
 
 }
