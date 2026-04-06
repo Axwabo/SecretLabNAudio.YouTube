@@ -2,6 +2,7 @@ global using System;
 global using System.Diagnostics.CodeAnalysis;
 global using System.IO;
 global using System.Threading;
+global using SecretLabNAudio.YouTube.Exceptions;
 global using UnityEngine;
 global using YoutubeExplode;
 global using YoutubeExplode.Exceptions;

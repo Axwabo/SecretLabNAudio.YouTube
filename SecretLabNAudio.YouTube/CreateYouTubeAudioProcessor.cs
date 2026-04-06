@@ -1,5 +1,4 @@
 using SecretLabNAudio.FFmpeg.Processors;
-using SecretLabNAudio.YouTube.Exceptions;
 using SecretLabNAudio.YouTube.Extensions;
 using static SecretLabNAudio.FFmpeg.Processors.AsyncFFmpegProcessorBase;
 using static SecretLabNAudio.FFmpeg.Processors.StreamBasedFFmpegAudioProcessor;

@@ -1,5 +1,4 @@
 using System.Threading.Tasks;
-using SecretLabNAudio.YouTube.Exceptions;
 
 namespace SecretLabNAudio.YouTube.Extensions;
 

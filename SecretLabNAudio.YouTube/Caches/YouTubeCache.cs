@@ -3,7 +3,6 @@ using SecretLabNAudio.FFmpeg;
 using SecretLabNAudio.FFmpeg.Caches;
 using SecretLabNAudio.FFmpeg.Extensions;
 using SecretLabNAudio.FFmpeg.Interop;
-using SecretLabNAudio.YouTube.Exceptions;
 using SecretLabNAudio.YouTube.Extensions;
 using YoutubeExplode.Channels;
 using YoutubeExplode.Common;
@@ -116,7 +115,7 @@ public sealed class YouTubeCache : AudioCacheBase<VideoId, string>
     /// Gets the cached metadata for the given video ID.
     /// </summary>
     /// <param name="videoId">The ID to get the metadata of.</param>
-    /// <returns></returns>
+    /// <returns></returns> TODO
     public (string? VideoTitle, string? ChannelTitle, ChannelId? ChannelId) GetCachedMetadata(VideoId videoId)
     {
         if (videoId == default)
@@ -125,30 +124,36 @@ public sealed class YouTubeCache : AudioCacheBase<VideoId, string>
         var titleFile = $"{filePath}.{TitleExtension}";
         var authorFile = $"{filePath}.{AuthorExtension}";
         var videoTitle = File.Exists(titleFile) ? File.ReadAllText(titleFile).Trim() : null;
-        return File.Exists(authorFile) && File.ReadAllLines(authorFile) is [var name, var id, ..]
-            ? (videoTitle, name.Trim(), ChannelId.TryParse(id.Trim()))
-            : (videoTitle, null, null);
+        return !File.Exists(authorFile)
+            ? (videoTitle, null, null)
+            : File.ReadAllLines(authorFile) switch
+            {
+                [var name, var id, ..] => (videoTitle, name.Trim(), ChannelId.TryParse(id)),
+                [var name, ..] => (videoTitle, name.Trim(), null),
+                _ => (videoTitle, null, null)
+            };
     }
+
+    
+    public Awaitable WriteMetadataAsync(VideoId videoId, string title, Author author, CancellationToken cancellationToken = default) 
+        => WriteMetadataAsync(videoId, Path.Combine(Folder, videoId), title, author, cancellationToken);
 
     private static async Awaitable<(FFmpegSL?, SaveCacheResult)> TranscodeAsync(Stream stream, string output, CancellationToken cancellationToken)
     {
+        await using var disposeStream = stream;
         var ffmpeg = FFmpegSL.Start(Template with {Output = output});
         if (ffmpeg == null)
             return (null, (output, FFmpegSL.LastCaughtStartError));
         try
         {
             await stream.CopyToAsync(ffmpeg.Stdin.BaseStream, cancellationToken).ConfigureAwait(false);
+            ffmpeg.Stdin.BaseStream.Close();
             return (ffmpeg, default);
         }
         catch (Exception e)
         {
             ffmpeg.Dispose();
             return (null, (output, e));
-        }
-        finally
-        {
-            ffmpeg.Stdin.BaseStream.Close();
-            await stream.DisposeAsync();
         }
     }
 
@@ -166,7 +171,7 @@ public sealed class YouTubeCache : AudioCacheBase<VideoId, string>
         }
         catch (Exception e)
         {
-            Debug.LogError($"Failed to write metadata for the cached YouTube video {id}");
+            Debug.LogError($"Failed to write metadata for YouTube video {id}");
             Debug.LogException(e);
         }
     }

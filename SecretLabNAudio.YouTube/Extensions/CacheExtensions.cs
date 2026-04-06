@@ -25,6 +25,12 @@ public static class CacheExtensions
         public Awaitable<SaveCacheResult> CacheAsync(VideoSearchResult result, PickStream pickStream, OptimizeFor optimizeFor, CancellationToken cancellationToken = default)
             => cache.CacheAsync(result.Id, result.Title, result.Author, pickStream, optimizeFor, cancellationToken);
 
+        public Awaitable WriteMetadataAsync(Video video, CancellationToken cancellationToken = default)
+            => cache.WriteMetadataAsync(video.Id, video.Title, video.Author, cancellationToken);
+
+        public Awaitable WriteMetadataAsync(VideoSearchResult result, CancellationToken cancellationToken = default)
+            => cache.WriteMetadataAsync(result.Id, result.Title, result.Author, cancellationToken);
+
     }
 
 }

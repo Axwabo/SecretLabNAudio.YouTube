@@ -12,6 +12,7 @@ using SecretLabNAudio.YouTube.Caches;
 using SecretLabNAudio.YouTube.Extensions;
 using UnityEngine;
 using YoutubeExplode;
+using YoutubeExplode.Common;
 using YoutubeExplode.Search;
 using YoutubeExplode.Videos;
 using Logger = LabApi.Features.Console.Logger;
@@ -57,7 +58,7 @@ public static class PlaybackManager
     public static void Play(VideoSearchResult searchResult)
     {
         PlayInternal(searchResult.Id, searchResult);
-        Server.SendBroadcast($"Now playing: {searchResult.Title}\nby {searchResult.Author}", 10);
+        BroadcastNowPlaying(searchResult.Title, searchResult.Author.ChannelTitle);
     }
 
     private static void PlayInternal(VideoId videoId, VideoSearchResult? result = null)
@@ -66,7 +67,7 @@ public static class PlaybackManager
         EnsurePlayer()
             .UseCachedYouTube(videoId)
             .Resume();
-        if (!YouTubeCache.Shared.TryGetPath(videoId, out _) && !CachingInProgress.ContainsKey(videoId))
+        if (!YouTubeCache.Shared.IsCached(videoId) && !CachingInProgress.ContainsKey(videoId))
             _ = CacheAsync(videoId, result);
     }
 
@@ -101,12 +102,21 @@ public static class PlaybackManager
         CachingInProgress.TryRemove(videoId, out _);
     }
 
+    private static void BroadcastNowPlaying(string title, string channelTitle) => Server.SendBroadcast($"Now playing: {title}\nby {channelTitle}", 10);
+
     private static async Awaitable BroadcastNowPlayingAsync(VideoId id)
     {
+        if (YouTubeCache.Shared.GetCachedMetadata(id) is ({ } videoTitle, { } channelTitle, _))
+        {
+            BroadcastNowPlaying(videoTitle, channelTitle);
+            return;
+        }
+
         try
         {
             var video = await YoutubeClient.Shared.Videos.GetAsync(id);
             Server.SendBroadcast($"Now playing: {video.Title}\nby {video.Author}", 10);
+            _ = YouTubeCache.Shared.WriteMetadataAsync(video);
         }
         catch (Exception e)
         {
