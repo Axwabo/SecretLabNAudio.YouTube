@@ -3,6 +3,7 @@ using SecretLabNAudio.FFmpeg;
 using SecretLabNAudio.FFmpeg.Caches;
 using SecretLabNAudio.FFmpeg.Extensions;
 using SecretLabNAudio.FFmpeg.Interop;
+using SecretLabNAudio.YouTube.Exceptions;
 using SecretLabNAudio.YouTube.Extensions;
 using YoutubeExplode.Channels;
 using YoutubeExplode.Common;

@@ -1,4 +1,4 @@
-namespace SecretLabNAudio.YouTube;
+namespace SecretLabNAudio.YouTube.Exceptions;
 
 public sealed class NoStreamFoundException : YoutubeExplodeException
 {

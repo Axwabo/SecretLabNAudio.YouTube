@@ -1,6 +1,7 @@
 using SecretLabNAudio.Core;
 using SecretLabNAudio.Core.Extensions;
 using SecretLabNAudio.YouTube.Caches;
+using SecretLabNAudio.YouTube.Exceptions;
 
 namespace SecretLabNAudio.YouTube.Extensions;
 

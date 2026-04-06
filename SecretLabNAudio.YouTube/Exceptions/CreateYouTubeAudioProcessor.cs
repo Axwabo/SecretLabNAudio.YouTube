@@ -1,7 +1,7 @@
 using SecretLabNAudio.FFmpeg.Processors;
 using SecretLabNAudio.YouTube.Extensions;
 
-namespace SecretLabNAudio.YouTube;
+namespace SecretLabNAudio.YouTube.Exceptions;
 
 public static class CreateYouTubeAudioProcessor
 {
