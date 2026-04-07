@@ -12,7 +12,6 @@ using SecretLabNAudio.YouTube.Caches;
 using SecretLabNAudio.YouTube.Extensions;
 using UnityEngine;
 using YoutubeExplode;
-using YoutubeExplode.Search;
 using YoutubeExplode.Videos;
 using Logger = LabApi.Features.Console.Logger;
 
@@ -54,20 +53,20 @@ public static class PlaybackManager
         _ = BroadcastNowPlayingAsync(id);
     }
 
-    public static void Play(VideoSearchResult searchResult)
+    public static void Play(IVideo video)
     {
-        PlayInternal(searchResult.Id, searchResult);
-        BroadcastNowPlaying(searchResult.Title, searchResult.Author.ChannelTitle);
+        PlayInternal(video.Id, video);
+        BroadcastNowPlaying(video.Title, video.Author.ChannelTitle);
     }
 
-    private static void PlayInternal(VideoId videoId, VideoSearchResult? result = null)
+    private static void PlayInternal(VideoId videoId, IVideo? video = null)
     {
         _lastError = null;
         EnsurePlayer()
             .UseCachedYouTube(videoId)
             .Resume();
         if (!YouTubeCache.Shared.IsCached(videoId) && !CachingInProgress.ContainsKey(videoId))
-            _ = CacheAsync(videoId, result);
+            _ = CacheAsync(videoId, video);
     }
 
     private static AudioPlayer EnsurePlayer()
@@ -85,15 +84,15 @@ public static class PlaybackManager
         AudioPlayerPool.Return(_player!);
     }
 
-    private static async Awaitable CacheAsync(VideoId videoId, VideoSearchResult? result)
+    private static async Awaitable CacheAsync(VideoId videoId, IVideo? video)
     {
         CachingInProgress[videoId] = true;
         await Awaitable.NextFrameAsync();
         using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(5));
         Logger.Info($"Caching YouTube video {videoId}");
-        var (_, error) = result == null
+        var (_, error) = video == null
             ? await YouTubeCache.Shared.CacheAsync(videoId, OptimizeFor.FileSize, cts.Token)
-            : await YouTubeCache.Shared.CacheAsync(result, OptimizeFor.FileSize, cts.Token);
+            : await YouTubeCache.Shared.CacheAsync(video, OptimizeFor.FileSize, cts.Token);
         if (error is not null)
             Logger.Error($"Failed to cache video {videoId}: {error.ToHumanReadableString()}");
         else
