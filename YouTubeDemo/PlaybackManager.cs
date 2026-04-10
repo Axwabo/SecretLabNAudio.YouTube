@@ -100,7 +100,8 @@ public static class PlaybackManager
         CachingInProgress.TryRemove(videoId, out _);
     }
 
-    private static void BroadcastNowPlaying(string title, string channelTitle) => Server.SendBroadcast($"Now playing: {title}\nby {channelTitle}", 10);
+    private static void BroadcastNowPlaying(string title, string channelTitle)
+        => Server.SendBroadcast($"Now playing: {title}\nby {channelTitle}", 10);
 
     private static async Awaitable BroadcastNowPlayingAsync(VideoId id)
     {
@@ -113,7 +114,7 @@ public static class PlaybackManager
         try
         {
             var video = await YoutubeClient.Shared.Videos.GetAsync(id);
-            Server.SendBroadcast($"Now playing: {video.Title}\nby {video.Author}", 10);
+            BroadcastNowPlaying(video.Title, video.Author.ChannelTitle);
             _ = YouTubeCache.Shared.WriteMetadataAsync(video);
         }
         catch (Exception e)
