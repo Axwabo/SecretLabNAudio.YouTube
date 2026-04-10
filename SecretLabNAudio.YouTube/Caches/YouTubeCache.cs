@@ -54,6 +54,8 @@ public sealed class YouTubeCache : AudioCacheBase<VideoId, string>
     /// <param name="optimizeFor">What to optimize for.</param>
     /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
     /// <returns>An <see cref="Awaitable"/> representing the asynchronous operation.</returns>
+    /// <remarks>The highest bitrate audio stream is used.</remarks>
+    /// <seealso cref="PickStreamExtensions"/>
     public override Awaitable<SaveCacheResult> CacheAsync(VideoId id, OptimizeFor optimizeFor, CancellationToken cancellationToken = default)
         => CacheAsync(id, null, null, PickStream.HighestBitrate, optimizeFor, cancellationToken);
 
@@ -63,7 +65,7 @@ public sealed class YouTubeCache : AudioCacheBase<VideoId, string>
     /// <param name="id">The ID of the video to download.</param>
     /// <param name="title">The title of the video (if known).</param>
     /// <param name="author">The author of the video (if known).</param>
-    /// <param name="pickStream">A delegate that picks the most optimal stream from, given the manifest.</param>
+    /// <param name="pickStream">A delegate that picks the most optimal stream from the manifest.</param>
     /// <param name="optimizeFor">What to optimize for.</param>
     /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
     /// <returns>An <see cref="Awaitable"/> representing the asynchronous operation.</returns>
@@ -78,6 +80,10 @@ public sealed class YouTubeCache : AudioCacheBase<VideoId, string>
         try
         {
             stream = await _client.GetAudioStreamAsync(id, pickStream, cancellationToken).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            return (output, SaveCacheError.Canceled);
         }
         catch (YoutubeExplodeException e)
         {
