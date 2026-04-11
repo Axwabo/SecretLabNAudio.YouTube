@@ -121,7 +121,12 @@ public sealed class YouTubeCache : AudioCacheBase<VideoId, string>
     /// Gets the cached metadata for the given video ID.
     /// </summary>
     /// <param name="videoId">The ID to get the metadata of.</param>
-    /// <returns></returns> TODO
+    /// <returns>
+    /// Returns a tuple of basic cached metadata. Each member is nullable.
+    /// The video title is not null if the <c>.title</c> file exists.
+    /// The channel title is not null if the <c>.author</c> file has at least one line.
+    /// The channel ID is not null if the <c>.author</c> file has a second line which contains a valid <see cref="ChannelId"/>.
+    /// </returns>
     public (string? VideoTitle, string? ChannelTitle, ChannelId? ChannelId) GetCachedMetadata(VideoId videoId)
     {
         if (videoId == default)
