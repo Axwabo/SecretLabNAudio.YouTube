@@ -1,0 +1,34 @@
+name: Release
+
+on:
+  release:
+    types: [ published ]
+
+permissions:
+  contents: write
+
+jobs:
+
+  release:
+    runs-on: ubuntu-latest
+    steps:
+
+      - uses: actions/checkout@v6
+
+      - uses: Axwabo/scpsl-references-downloader@v1
+
+      - name: Build
+        run: dotnet build -c Release -o Out
+
+      - name: Create Bundle
+        working-directory: Out
+        run: dotnet run ../bundle.cs
+
+      - name: Upload Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: Out/SecretLabNAudio.YouTube.dll,Out/SecretLabNAudio.YouTube.xml,Out/SecretLabNAudio.YouTube.zip
+
+      - name: Push to NuGet
+        working-directory: Out
+        run: dotnet nuget push SecretLabNAudio.YouTube.*.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
