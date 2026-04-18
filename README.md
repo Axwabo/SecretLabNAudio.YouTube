@@ -6,9 +6,34 @@ This module extends [SecretLabNAudio](https://github.com/Axwabo/SecretLabNAudio)
 > SecretLabNAudio is not sponsored nor endorsed by NAudio.
 > SecretLabNAudio.YouTube is not sponsored nor endorsed by YouTube.
 
+This library has a number of open-source dependencies. See [Attributions](ATTRIBUTIONS.md)
+
 # Installation
 
-[//]: # (TODO)
+1. Install [SecretLabNAudio.FFmpeg](https://github.com/Axwabo/SecretLabNAudio#installation) version 2.0.0 or higher
+   - Choose the single-file installation, or install the `FFmpeg` module
+2. Download the `SecretLabNAudio.YouTube.dll` file from the [releases page](https://github.com/Axwabo/SecretLabNAudio/releases)
+3. Download the `dependencies.zip` file from the releases page
+4. Extract the DLLs from the `bin/` folder of the `dependencies.zip` archive to the **dependencies** directory
+   - Linux: `~/.config/SCP Secret Laboratory/LabAPI/dependencies/<port>/`
+   - Windows: `%appdata%/SCP Secret Laboratory/LabAPI/dependencies/<port>/`
+5. Place the `SecretLabNAudio.YouTube.dll` file into the **plugins** directory
+   - Linux: `~/.config/SCP Secret Laboratory/LabAPI/plugins/<port>/`
+   - Windows: `%appdata%/SCP Secret Laboratory/LabAPI/plugins/<port>/`
+6. Restart the server
+
+> [!NOTE]
+> If you would like to use the [demo plugin](https://github.com/Axwabo/SecretLabNAudio.YouTube/tree/main/YouTubeDemo)
+> as well, download the `SecretLabNAudio.YouTube.Demo.dll` file and place it in the **plugins** directory.
+
+| Plugins                                                             | Dependencies                                                                                |
+|---------------------------------------------------------------------|---------------------------------------------------------------------------------------------|
+| `SecretLabNAudio.YouTube` `SecretLabNAudio.YouTube.Demo` (optional) | `AngleSharp` `System.Text.Encoding.CodePages`  `System.Text.Encodings.Web` `YoutubeExplode` |
+
+## Development
+
+Simply install the `SecretLabNAudio.YouTube` package from NuGet.
+It will automatically install dependencies in the project.
 
 # Usage
 

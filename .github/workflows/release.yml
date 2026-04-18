@@ -27,7 +27,7 @@ jobs:
       - name: Upload Assets
         uses: softprops/action-gh-release@v2
         with:
-          files: Out/SecretLabNAudio.YouTube.dll,Out/SecretLabNAudio.YouTube.xml,Out/SecretLabNAudio.YouTube.zip
+          files: Out/SecretLabNAudio.YouTube.dll,Out/SecretLabNAudio.YouTube.xml,Out/SecretLabNAudio.YouTube.Demo.dll,Out/dependencies.zip
 
       - name: Push to NuGet
         working-directory: Out

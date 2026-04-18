@@ -5,7 +5,7 @@ using System.IO.Compression;
 const string license = "LICENSE";
 const string thirdParty = "THIRD_PARTY_LICENSES";
 
-using var zipFile = File.Create("SecretLabNAudio.YouTube.zip");
+using var zipFile = File.Create("dependencies.zip");
 using var archive = new ZipArchive(zipFile, ZipArchiveMode.Create);
 
 foreach (var file in Directory.EnumerateFiles("."))
