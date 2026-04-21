@@ -1,3 +1,5 @@
+// must be executed in the build output directory
+
 #:property TargetFramework=net10.0
 
 using System.IO.Compression;
