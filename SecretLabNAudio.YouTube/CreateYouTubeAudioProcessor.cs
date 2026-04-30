@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using SecretLabNAudio.FFmpeg.Processors;
 using SecretLabNAudio.YouTube.Extensions;
 using static SecretLabNAudio.FFmpeg.Processors.AsyncFFmpegProcessorBase;
@@ -19,11 +20,8 @@ public static class CreateYouTubeAudioProcessor
     /// <include file='XmlDocs/Processor.xml' path='doc/returns'/>
     /// <include file='XmlDocs/Processor.xml' path='doc/remarks'/>
     /// <seealso cref="PickStreamExtensions"/>
-    public static StreamBasedFFmpegAudioProcessor HighestQuality(VideoId videoId, double capacity = DefaultCapacity) => CreatePlayerCompatible(async token =>
-    {
-        var stream = await YoutubeClient.Shared.GetHighestQualityAudioStreamAsync(videoId, token);
-        return stream ?? throw new NoStreamFoundException(videoId);
-    }, capacity);
+    public static StreamBasedFFmpegAudioProcessor HighestQuality(VideoId videoId, double capacity = DefaultCapacity)
+        => CreatePlayerCompatible(GetHighestQualityAsync(videoId), capacity);
 
     /// <summary>
     /// Creates a <see cref="StreamBasedFFmpegAudioProcessor"/> from the given video.
@@ -77,5 +75,11 @@ public static class CreateYouTubeAudioProcessor
                 throw new TimeoutException("Obtaining an audio stream timed out.", e);
             }
         }, capacity);
+
+    internal static Func<CancellationToken, Task<Stream>> GetHighestQualityAsync(VideoId videoId) => async token =>
+    {
+        var stream = await YoutubeClient.Shared.GetHighestQualityAudioStreamAsync(videoId, token);
+        return stream ?? throw new NoStreamFoundException(videoId);
+    };
 
 }
