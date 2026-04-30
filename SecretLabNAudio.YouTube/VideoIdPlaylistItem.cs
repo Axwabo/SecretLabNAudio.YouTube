@@ -6,14 +6,14 @@ using SecretLabNAudio.YouTube.Caches;
 
 namespace SecretLabNAudio.YouTube;
 
-public sealed record VideoIdPlaylistItem(VideoId Id) : PlaylistItem
+public sealed record VideoIdPlaylistItem(VideoId Source) : PlaylistItem
 {
 
     internal static StreamBasedFFmpegAudioProcessor CreateProvider(VideoId videoId, int sampleRate, int channels)
         => StreamBasedFFmpegAudioProcessor.Create(CreateYouTubeAudioProcessor.GetHighestQualityAsync(videoId), sampleRate, channels);
 
     public override ISampleProvider CreateProvider(int sampleRate, int channels)
-        => CreateProvider(Id, sampleRate, channels);
+        => CreateProvider(Source, sampleRate, channels);
 
 }
 
@@ -25,13 +25,13 @@ public sealed record YouTubeVideoPlaylistItem(IVideo Video) : PlaylistItem(Video
 
 }
 
-public sealed record CachedVideoIdPlaylistItem(VideoId Id) : CachedPlaylistItem<VideoId, string>(Id)
+public sealed record CachedVideoIdPlaylistItem(VideoId Source) : CachedPlaylistItem<VideoId, string>(Source)
 {
 
     protected override AudioCacheBase<VideoId, string> GetCache() => YouTubeCache.Shared;
 
     protected override ISampleProvider CreateFallback(int sampleRate, int channels)
-        => VideoIdPlaylistItem.CreateProvider(Id, sampleRate, channels);
+        => VideoIdPlaylistItem.CreateProvider(Source, sampleRate, channels);
 
 }
 
