@@ -12,7 +12,7 @@ public sealed record VideoIdPlaylistItem(VideoId Source) : PlaylistItem
     internal static StreamBasedFFmpegAudioProcessor CreateProvider(VideoId videoId, int sampleRate, int channels)
         => StreamBasedFFmpegAudioProcessor.Create(CreateYouTubeAudioProcessor.GetHighestQualityAsync(videoId), sampleRate, channels);
 
-    public override ISampleProvider CreateProvider(int sampleRate, int channels)
+    protected override ISampleProvider CreateProvider(int sampleRate, int channels)
         => CreateProvider(Source, sampleRate, channels);
 
 }
@@ -20,7 +20,7 @@ public sealed record VideoIdPlaylistItem(VideoId Source) : PlaylistItem
 public sealed record YouTubeVideoPlaylistItem(IVideo Video) : PlaylistItem(Video.Title)
 {
 
-    public override ISampleProvider CreateProvider(int sampleRate, int channels)
+    protected override ISampleProvider CreateProvider(int sampleRate, int channels)
         => VideoIdPlaylistItem.CreateProvider(Video.Id, sampleRate, channels);
 
 }
