@@ -13,7 +13,7 @@ using var archive = new ZipArchive(zipFile, ZipArchiveMode.Create);
 foreach (var file in Directory.EnumerateFiles("."))
 {
     var name = Path.GetFileNameWithoutExtension(file.AsSpan());
-    if (name is "AngleSharp" or "System.Text.Encoding.CodePages" or "System.Text.Encodings.Web" or "YoutubeExplode")
+    if (name is "AngleSharp" or "JsonExtensions" or "System.Text.Encoding.CodePages" or "System.Text.Encodings.Web" or "YoutubeExplode")
         archive.CreateEntryFromFile(file, $"bin/{name}");
 }
 

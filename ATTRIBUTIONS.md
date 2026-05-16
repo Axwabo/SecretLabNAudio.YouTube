@@ -15,6 +15,14 @@ https://github.com/AngleSharp/AngleSharp/
 
 License: MIT
 
+## JsonExtensions
+
+Extensions for System.Text.Json
+
+https://github.com/Tyrrrz/JsonExtensions
+
+License: MIT
+
 ## YoutubeExplode
 
 Abstraction layer over YouTube's internal API
