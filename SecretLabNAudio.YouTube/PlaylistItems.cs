@@ -6,7 +6,7 @@ using SecretLabNAudio.YouTube.Caches;
 
 namespace SecretLabNAudio.YouTube;
 
-public sealed record VideoIdPlaylistItem(VideoId Source) : PlaylistItem
+public sealed record VideoIdPlaylistItem(VideoId Source) : PlaylistItem, IVideoIdPlaylistItem
 {
 
     internal static StreamBasedFFmpegAudioProcessor CreateProvider(VideoId videoId, int sampleRate, int channels)
@@ -17,7 +17,7 @@ public sealed record VideoIdPlaylistItem(VideoId Source) : PlaylistItem
 
 }
 
-public sealed record YouTubeVideoPlaylistItem(IVideo Video) : PlaylistItem(Video.Title)
+public sealed record YouTubeVideoPlaylistItem(IVideo Video) : PlaylistItem(Video.Title), IYouTubeVideoPlaylistItem
 {
 
     protected override ISampleProvider CreateProvider(int sampleRate, int channels)
@@ -25,7 +25,7 @@ public sealed record YouTubeVideoPlaylistItem(IVideo Video) : PlaylistItem(Video
 
 }
 
-public sealed record CachedVideoIdPlaylistItem(VideoId Source) : CachedPlaylistItem<VideoId, string>(Source)
+public sealed record CachedVideoIdPlaylistItem(VideoId Source) : CachedPlaylistItem<VideoId, string>(Source), IVideoIdPlaylistItem
 {
 
     protected override AudioCacheBase<VideoId, string> GetCache() => YouTubeCache.Shared;
@@ -35,7 +35,7 @@ public sealed record CachedVideoIdPlaylistItem(VideoId Source) : CachedPlaylistI
 
 }
 
-public sealed record CachedYouTubeVideoPlaylistItem(IVideo Video) : CachedPlaylistItem<VideoId, string>(Video.Id, Video.Title)
+public sealed record CachedYouTubeVideoPlaylistItem(IVideo Video) : CachedPlaylistItem<VideoId, string>(Video.Id, Video.Title), IYouTubeVideoPlaylistItem
 {
 
     protected override AudioCacheBase<VideoId, string> GetCache() => YouTubeCache.Shared;
