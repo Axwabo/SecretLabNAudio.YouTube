@@ -124,3 +124,21 @@ else
 
 </details>
 
+## Playlists
+
+You can add YouTube videos to a `LazyPlaylist` with extension methods.
+
+<details>
+<summary>Example</summary>
+
+```csharp
+audioPlayer.UsePlaylist(playlist => 
+{
+    // use cached version if possible
+    playlist.AddCachedYouTube("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+        .AddCachedYouTube("https://youtu.be/eR8VEqaaWY8");
+    playlist.CurrentItemChanged += BroadcastNowPlaying;
+});
+```
+
+</details>
