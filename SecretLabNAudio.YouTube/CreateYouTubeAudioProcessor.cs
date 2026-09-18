@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using SecretLabNAudio.FFmpeg;
 using SecretLabNAudio.FFmpeg.Processors;
 using SecretLabNAudio.YouTube.Extensions;
 using static SecretLabNAudio.FFmpeg.Processors.AsyncFFmpegProcessorBase;
@@ -12,6 +13,12 @@ namespace SecretLabNAudio.YouTube;
 public static class CreateYouTubeAudioProcessor
 {
 
+    private static readonly FFmpegArguments Arguments = FFmpegArguments.PlayerCompatibleStdout with
+    {
+        Input = FFmpegArguments.StandardPipe,
+        InputOptions = "-vn"
+    };
+
     /// <summary>
     /// Creates a <see cref="StreamBasedFFmpegAudioProcessor"/> that selects the highest bitrate audio stream from the given video.
     /// </summary>
@@ -21,7 +28,7 @@ public static class CreateYouTubeAudioProcessor
     /// <include file='XmlDocs/Processor.xml' path='doc/remarks'/>
     /// <seealso cref="PickStreamExtensions"/>
     public static StreamBasedFFmpegAudioProcessor HighestQuality(VideoId videoId, double capacity = DefaultCapacity)
-        => CreatePlayerCompatible(GetHighestQualityAsync(videoId), capacity);
+        => Create(GetHighestQualityAsync(videoId), Arguments, capacity);
 
     /// <summary>
     /// Creates a <see cref="StreamBasedFFmpegAudioProcessor"/> from the given video.
@@ -31,11 +38,11 @@ public static class CreateYouTubeAudioProcessor
     /// <param name="capacity">The capacity of the buffer in seconds.</param>
     /// <include file='XmlDocs/Processor.xml' path='doc/returns'/>
     /// <include file='XmlDocs/Processor.xml' path='doc/remarks'/>
-    public static StreamBasedFFmpegAudioProcessor ManualSelect(VideoId videoId, PickStream pickStream, double capacity = DefaultCapacity) => CreatePlayerCompatible(async token =>
+    public static StreamBasedFFmpegAudioProcessor ManualSelect(VideoId videoId, PickStream pickStream, double capacity = DefaultCapacity) => Create(async token =>
     {
         var stream = await YoutubeClient.Shared.GetAudioStreamAsync(videoId, pickStream, token);
         return stream ?? throw new NoStreamFoundException(videoId);
-    }, capacity);
+    }, Arguments, capacity);
 
     /// <summary>
     /// Creates a <see cref="StreamBasedFFmpegAudioProcessor"/> that selects the highest bitrate audio stream from the given video.
@@ -61,7 +68,7 @@ public static class CreateYouTubeAudioProcessor
     /// <include file='XmlDocs/Processor.xml' path='doc/returns'/>
     /// <include file='XmlDocs/Processor.xml' path='doc/remarks'/>
     public static StreamBasedFFmpegAudioProcessor ManualSelect(VideoId videoId, PickStream pickStream, TimeSpan getStreamTimeout, double capacity = DefaultCapacity, YoutubeClient? youtubeClient = null)
-        => CreatePlayerCompatible(async token =>
+        => Create(async token =>
         {
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(token);
             cts.CancelAfter(getStreamTimeout);
@@ -74,7 +81,10 @@ public static class CreateYouTubeAudioProcessor
             {
                 throw new TimeoutException("Obtaining an audio stream timed out.", e);
             }
-        }, capacity);
+        }, Arguments, capacity);
+
+    public static StreamBasedFFmpegAudioProcessor FromStreamInfo(IAudioStreamInfo info, double capacity = DefaultCapacity, YoutubeClient? youtubeClient = null)
+        => Create(async token => await (youtubeClient ?? YoutubeClient.Shared).GetAudioStreamAsync(info, token), Arguments, capacity);
 
     internal static Func<CancellationToken, Task<Stream>> GetHighestQualityAsync(VideoId videoId) => async token =>
     {

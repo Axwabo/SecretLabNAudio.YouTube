@@ -12,6 +12,8 @@ public static class AudioPlayerExtensions
 
         public AudioPlayer UseYouTube(VideoId videoId) => player.Use(CreateYouTubeAudioProcessor.HighestQuality(videoId));
 
+        public AudioPlayer UseYouTube(IAudioStreamInfo streamInfo) => player.Use(CreateYouTubeAudioProcessor.FromStreamInfo(streamInfo));
+
         public AudioPlayer UseCachedYouTube(VideoId videoId)
             => YouTubeCache.Shared.TryGetPath(videoId, out var cachedPath)
                 ? player.UseFile(cachedPath)

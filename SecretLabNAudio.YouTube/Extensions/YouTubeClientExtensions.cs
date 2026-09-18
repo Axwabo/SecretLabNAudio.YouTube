@@ -62,6 +62,26 @@ public static class YouTubeClientExtensions
             }
         }
 
+        public async Task<Stream> GetAudioStreamAsync(IAudioStreamInfo info, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                return await client.Videos.Streams.GetAsync(info, cancellationToken).ConfigureAwait(false);
+            }
+            catch (YoutubeExplodeException)
+            {
+                throw;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception e)
+            {
+                throw new PossiblyOutdatedYoutubeExplodeException(e);
+            }
+        }
+
     }
 
 }
