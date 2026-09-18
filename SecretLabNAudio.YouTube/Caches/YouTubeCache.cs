@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using LabApi.Loader.Features.Paths;
 using SecretLabNAudio.FFmpeg;
 using SecretLabNAudio.FFmpeg.Caches;
@@ -57,7 +58,7 @@ public sealed class YouTubeCache : AudioCacheBase<VideoId, string>
     /// <remarks>The highest bitrate audio stream is used.</remarks>
     /// <seealso cref="PickStreamExtensions"/>
     public override Awaitable<SaveCacheResult> CacheAsync(VideoId id, OptimizeFor optimizeFor, CancellationToken cancellationToken = default)
-        => CacheAsync(id, null, null, PickStream.HighestBitrate, optimizeFor, cancellationToken);
+        => CacheAsync(id, null, null, (client, videoId, token) => client.GetHighestQualityAudioStreamAsync(videoId, token), optimizeFor, cancellationToken);
 
     /// <summary>
     /// Asynchronously starts and waits for FFmpeg to cache the given YouTube video.
@@ -65,11 +66,11 @@ public sealed class YouTubeCache : AudioCacheBase<VideoId, string>
     /// <param name="id">The ID of the video to download.</param>
     /// <param name="title">The title of the video (if known).</param>
     /// <param name="author">The author of the video (if known).</param>
-    /// <param name="pickStream">A delegate that picks the most optimal stream from the manifest.</param>
+    /// <param name="resolveStream">A delegate that resolves the stream, given the YouTube client and the video ID.</param>
     /// <param name="optimizeFor">What to optimize for.</param>
     /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
     /// <returns>An <see cref="Awaitable"/> representing the asynchronous operation.</returns>
-    public async Awaitable<SaveCacheResult> CacheAsync(VideoId id, string? title, Author? author, PickStream pickStream, OptimizeFor optimizeFor, CancellationToken cancellationToken = default)
+    public async Awaitable<SaveCacheResult> CacheAsync(VideoId id, string? title, Author? author, Func<YoutubeClient, VideoId, CancellationToken, Task<Stream?>> resolveStream, OptimizeFor optimizeFor, CancellationToken cancellationToken = default)
     {
         if (id == default)
             return ("", new InvalidInputError(id.Value));
@@ -79,7 +80,7 @@ public sealed class YouTubeCache : AudioCacheBase<VideoId, string>
         Stream? stream;
         try
         {
-            stream = await _client.GetAudioStreamAsync(id, pickStream, cancellationToken).ConfigureAwait(false);
+            stream = await resolveStream(_client, id, cancellationToken).ConfigureAwait(false);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
