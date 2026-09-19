@@ -10,7 +10,7 @@ This library has a number of open-source dependencies. See [Attributions](ATTRIB
 
 # Installation
 
-1. Install [SecretLabNAudio.FFmpeg](https://github.com/Axwabo/SecretLabNAudio#installation) version 2.0.0 or higher
+1. Install [SecretLabNAudio.FFmpeg](https://github.com/Axwabo/SecretLabNAudio#installation) version 2.1.0 or higher
    - Choose the single-file installation, or install the `FFmpeg` module
 2. Download the `SecretLabNAudio.YouTube.dll` file from the [releases page](https://github.com/Axwabo/SecretLabNAudio/releases)
 3. Download the `dependencies.zip` file from the releases page

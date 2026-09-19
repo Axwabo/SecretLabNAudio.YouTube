@@ -62,6 +62,13 @@ public static class YouTubeClientExtensions
             }
         }
 
+        /// <summary>
+        /// Gets the stream from the stream info, and throws adequate exceptions.
+        /// </summary>
+        /// <param name="info">The stream to get.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        /// <include file='../XmlDocs/GetStream.xml' path='doc/exception'/>
         public async Task<Stream> GetAudioStreamAsync(IAudioStreamInfo info, CancellationToken cancellationToken = default)
         {
             try
