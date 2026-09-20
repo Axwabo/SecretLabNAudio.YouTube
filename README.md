@@ -154,5 +154,5 @@ audioPlayer.UsePlaylist(playlist =>
 The `CurrentVideoId` and `CurrentVideo` extension properties return
 adequate data if the current item is known to be a YouTube video.
 
-The `RemainingVideoIds` and `RemainingVideos` filters the remaining items,
-and returns the known data.
+The `RemainingVideoIds` and `RemainingVideos` extension properties filter
+the remaining items and return the known data.
