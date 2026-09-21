@@ -56,7 +56,9 @@ AudioPlayerPool.RentGloballyAudible()
 </details>
 
 > [!TIP]
-> See also: [demo project](https://github.com/Axwabo/SecretLabNAudio.YouTube/tree/main/YouTubeDemo)
+> See also:
+> [YoutubeExplode examples](https://github.com/tyrrrz/youtubeexplode#usage)
+> [demo project](https://github.com/Axwabo/SecretLabNAudio.YouTube/tree/main/YouTubeDemo)
 
 If you want more control over the audio processor, call a method from the  `CreateYouTubeProcessor` class.
 
