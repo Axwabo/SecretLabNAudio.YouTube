@@ -22,12 +22,11 @@ public static class PlaylistExtensions
 
         public IVideo? CurrentVideo => (playlist.CurrentItem as IYouTubeVideoPlaylistItem)?.Video;
 
-        public IEnumerable<VideoId> RemainingVideoIds => playlist.Items
-            .Skip(playlist.Index + 1)
+        public IEnumerable<VideoId> GetRemainingVideoIds(bool includeCurrent = true) => playlist.GetRemainingItems(includeCurrent)
             .OfType<IVideoIdPlaylistItem>()
             .Select(e => e.Source);
 
-        public IEnumerable<IVideo> RemainingVideos => playlist.Items
+        public IEnumerable<IVideo> GetRemainingVideos(bool includeCurrent = true) => playlist.GetRemainingItems(includeCurrent)
             .Skip(playlist.Index + 1)
             .OfType<IYouTubeVideoPlaylistItem>()
             .Select(e => e.Video);

@@ -10,7 +10,7 @@ This library has a number of open-source dependencies. See [Attributions](ATTRIB
 
 # Installation
 
-1. Install [SecretLabNAudio.FFmpeg](https://github.com/Axwabo/SecretLabNAudio#installation) version 2.1.0 or higher
+1. Install [SecretLabNAudio.FFmpeg](https://github.com/Axwabo/SecretLabNAudio#installation) version **2.1.2** or higher
    - Choose the single-file installation, or install the `FFmpeg` module
 2. Download the `SecretLabNAudio.YouTube.dll` file from the [releases page](https://github.com/Axwabo/SecretLabNAudio/releases)
 3. Download the `dependencies.zip` file from the releases page
@@ -36,9 +36,6 @@ Simply install the `SecretLabNAudio.YouTube` package from NuGet.
 It will automatically install dependencies in the project.
 
 # Usage
-
-> [!TIP]
-> See also: [YoutubeExplode examples](https://github.com/tyrrrz/youtubeexplode#usage)
 
 To simply play a YouTube video, call the `UseYouTube` extension method.
 
@@ -127,11 +124,6 @@ else
 
 </details>
 
-> [!CAUTION]
-> When caching videos based on user input, caches might take up a lot of disk space.
-> You can query the metadata/streams of the video, and decide if it should be skipped
-> due to the video being too long or the original stream's size being too large.
-
 ## Playlists
 
 You can add YouTube videos to a `LazyPlaylist` with extension methods.
@@ -150,9 +142,3 @@ audioPlayer.UsePlaylist(playlist =>
 ```
 
 </details>
-
-The `CurrentVideoId` and `CurrentVideo` extension properties return
-adequate data if the current item is known to be a YouTube video.
-
-The `RemainingVideoIds` and `RemainingVideos` extension properties filter
-the remaining items and return the known data.
