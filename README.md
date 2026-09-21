@@ -26,9 +26,9 @@ This library has a number of open-source dependencies. See [Attributions](ATTRIB
 > If you would like to use the [demo plugin](https://github.com/Axwabo/SecretLabNAudio.YouTube/tree/main/YouTubeDemo)
 > as well, download the `SecretLabNAudio.YouTube.Demo.dll` file and place it in the **plugins** directory.
 
-| Plugins                                                             | Dependencies                                                                                |
-|---------------------------------------------------------------------|---------------------------------------------------------------------------------------------|
-| `SecretLabNAudio.YouTube` `SecretLabNAudio.YouTube.Demo` (optional) | `AngleSharp` `System.Text.Encoding.CodePages`  `System.Text.Encodings.Web` `YoutubeExplode` |
+| Plugins                                                             | Dependencies                                 |
+|---------------------------------------------------------------------|----------------------------------------------|
+| `SecretLabNAudio.YouTube` `SecretLabNAudio.YouTube.Demo` (optional) | `System.Text.Encodings.Web` `YoutubeExplode` |
 
 ## Development
 
