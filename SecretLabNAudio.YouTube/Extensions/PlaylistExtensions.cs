@@ -77,7 +77,6 @@ public static class PlaylistExtensions
         /// <param name="includeCurrent">Whether to include the current item.</param>
         /// <returns>An enumerable containing known <see cref="IVideo"/>s.</returns>
         public IEnumerable<IVideo> GetRemainingVideos(bool includeCurrent = true) => playlist.GetRemainingItems(includeCurrent)
-            .Skip(playlist.Index + 1)
             .OfType<IYouTubeVideoPlaylistItem>()
             .Select(e => e.Video);
 
