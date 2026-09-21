@@ -13,12 +13,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7.0.1
 
       - uses: Axwabo/scpsl-references-downloader@v1
+        id: refs
 
       - name: Build
         run: dotnet build -c Release -o Out
+        env:
+          SL_REFERENCES: ${{ steps.refs.outputs.target }} 
 
       - name: Create Bundle
         working-directory: Out
@@ -33,7 +36,7 @@ jobs:
         uses: NuGet/login@v1.2.0
         id: login
         with:
-          user: ${{ secrets.NUGET_USER }}
+          user: Axwabo
       
       - name: Push to NuGet
         working-directory: Out
