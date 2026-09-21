@@ -35,11 +35,21 @@ public static class AudioPlayerExtensions
         /// <returns>The player itself.</returns>
         public AudioPlayer UseYouTube(IAudioStreamInfo streamInfo) => player.Use(CreateYouTubeAudioProcessor.FromStreamInfo(streamInfo));
 
+        /// <summary>
+        /// Uses the <see cref="YouTubeCache.Shared">shared YouTube cache</see> to play a cached YouTube video, or falls back to streaming it from YouTube.
+        /// </summary>
+        /// <param name="videoId">The ID of the video to play.</param>
+        /// <returns>The player itself.</returns>
         public AudioPlayer UseCachedYouTube(VideoId videoId)
             => YouTubeCache.Shared.TryGetPath(videoId, out var cachedPath)
                 ? player.UseFile(cachedPath)
                 : player.UseYouTube(videoId);
 
+        /// <summary>
+        /// Uses the <see cref="YouTubeCache.Shared">shared YouTube cache</see> to play a cached YouTube video, or falls back to streaming it from YouTube.
+        /// </summary>
+        /// <param name="video">The video to play.</param>
+        /// <returns>The player itself.</returns>
         public AudioPlayer UseCachedYouTube(IVideo video) => player.UseCachedYouTube(video.Id);
 
     }
