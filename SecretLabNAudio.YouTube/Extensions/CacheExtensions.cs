@@ -69,14 +69,13 @@ public static class CacheExtensions
             => cache.CacheAsync(video.Id, video.Title, video.Author, pickStream, optimizeFor, cancellationToken);
 
         /// <summary>
-        /// Asynchronously writes metadata to the disk about the video.
+        /// Asynchronously starts and waits for FFmpeg to cache the given YouTube video.
         /// </summary>
-        /// <param name="video">Information about the video.</param>
-        /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+        /// <param name="video">Metadata about the video.</param>
+        /// <param name="streamInfo">The information to resolve the audio stream from.</param>
+        /// <param name="optimizeFor">What to optimize for.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>An <see cref="Awaitable"/> representing the asynchronous operation.</returns>
-        public Awaitable WriteMetadataAsync(IVideo video, CancellationToken cancellationToken = default)
-            => cache.WriteMetadataAsync(video.Id, video.Title, video.Author, cancellationToken);
-
         public Awaitable<SaveCacheResult> CacheAsync(IVideo video, IAudioStreamInfo streamInfo, OptimizeFor optimizeFor, CancellationToken cancellationToken = default)
             => cache.CacheAsync(
                 video.Id,
@@ -86,6 +85,15 @@ public static class CacheExtensions
                 optimizeFor,
                 cancellationToken
             );
+
+        /// <summary>
+        /// Asynchronously writes metadata to the disk about the video.
+        /// </summary>
+        /// <param name="video">Information about the video.</param>
+        /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+        /// <returns>An <see cref="Awaitable"/> representing the asynchronous operation.</returns>
+        public Awaitable WriteMetadataAsync(IVideo video, CancellationToken cancellationToken = default)
+            => cache.WriteMetadataAsync(video.Id, video.Title, video.Author, cancellationToken);
 
     }
 
